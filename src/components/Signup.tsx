@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Loader2, BarChart3, CheckCircle2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { authService } from '@/lib/auth';
 
 export default function Signup() {
@@ -15,7 +14,6 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +39,7 @@ export default function Signup() {
         setIsSuccess(true);
         setIsLoading(false);
       }
-    } catch (err: any) {
+    } catch (_err: unknown) {
       setError('An unexpected error occurred. Please try again.');
       setIsLoading(false);
     }
@@ -135,7 +133,7 @@ export default function Signup() {
               </div>
               <h3 className="text-lg font-bold text-[#0F172A] mb-2">Check your email</h3>
               <p className="text-sm text-[#475569] mb-6">
-                We've sent a verification link to <strong>{email}</strong>. Please click the link to confirm your account.
+                We&apos;ve sent a verification link to <strong>{email}</strong>. Please click the link to confirm your account.
               </p>
               <Link
                 href="/login"

@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
 import { Loader2, Plus, Calendar, ArrowRight, BarChart3, BrainCircuit } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import Link from 'next/link';
@@ -23,7 +22,6 @@ export default function Dashboard() {
   const { user, loading } = useAuth();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [isFetching, setIsFetching] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     async function fetchAssessments() {

@@ -16,7 +16,7 @@ export default function Assessment() {
   const [isFinished, setIsFinished] = useState(false);
 
   // Mock assessment state
-  const [scores, setScores] = useState({
+  const [scores] = useState({
     analytical: 85,
     creativity: 70,
     business: 60,
@@ -71,7 +71,7 @@ export default function Assessment() {
               <>
                 <h1 className="text-2xl font-bold text-[#0F172A] mb-6">Complete Your Assessment</h1>
                 <p className="text-[#64748B] mb-12">
-                  We've simulated your responses for this demonstration. Review your profile before saving it to your dashboard.
+                  We&apos;ve simulated your responses for this demonstration. Review your profile before saving it to your dashboard.
                 </p>
 
                 <div className="space-y-8 mb-12">

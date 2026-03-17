@@ -38,7 +38,7 @@ export default function Login() {
       } else {
         router.push('/dashboard');
       }
-    } catch (err: any) {
+    } catch (_err: unknown) {
       setError('An unexpected error occurred. Please try again.');
       setIsLoading(false);
     }
@@ -53,7 +53,7 @@ export default function Login() {
         setError(error.message);
         setIsLoading(false);
       }
-    } catch (err: any) {
+    } catch (_err: unknown) {
       setError('An unexpected error occurred. Please try again.');
       setIsLoading(false);
     }

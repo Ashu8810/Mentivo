@@ -6,15 +6,12 @@ import {
   ArrowLeft, 
   Download, 
   RotateCcw, 
-  Target, 
   Activity, 
   ShieldAlert, 
   BarChart, 
   Eye, 
-  CheckCircle2, 
   TrendingUp,
-  Loader2,
-  BrainCircuit
+  Loader2
 } from "lucide-react";
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/context/AuthContext';
@@ -58,9 +55,10 @@ export default function ReportPage({ params: paramsPromise }: { params: Promise<
         if (!data) throw new Error('Report not found');
 
         setReport(data);
-      } catch (err: any) {
-        console.error('Error fetching report:', err);
-        setError(err.message || 'An error occurred while fetching the report');
+      } catch (err: unknown) {
+        const error = err as Error;
+        console.error('Error fetching report:', error);
+        setError(error.message || 'An error occurred while fetching the report');
       } finally {
         setIsLoading(false);
       }

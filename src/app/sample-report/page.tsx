@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { ArrowLeft, ChevronDown, Download, RotateCcw, Target, Activity, ShieldAlert, BarChart, Eye, FileText, CheckCircle2, TrendingUp } from "lucide-react";
+import { ArrowLeft, Download, RotateCcw, TrendingUp, Target, Activity, ShieldAlert, BarChart, Eye, CheckCircle2 } from "lucide-react";
 
 export default function SampleReportPage() {
   return (
