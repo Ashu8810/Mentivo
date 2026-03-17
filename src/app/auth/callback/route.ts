@@ -6,7 +6,7 @@ export async function GET(request: Request) {
     const requestUrl = new URL(request.url);
     const code = requestUrl.searchParams.get('code');
 
-    const cookieStore = await cookies();
+    const cookieStore = await cookies(); 
 
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,13 +16,11 @@ export async function GET(request: Request) {
                 get(name: string) {
                     return cookieStore.get(name)?.value;
                 },
-                set(name: string, value: string, options: Record<string, unknown>) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    cookieStore.set({ name, value, ...options } as any);
+                set(name: string, value: string, options: any) {
+                    cookieStore.set({ name, value, ...options });
                 },
-                remove(name: string, options: Record<string, unknown>) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    cookieStore.set({ name, value: '', ...options } as any);
+                remove(name: string, options: any) {
+                    cookieStore.set({ name, value: '', ...options });
                 },
             },
         }
