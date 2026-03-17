@@ -6,7 +6,7 @@ export async function GET(request: Request) {
     const requestUrl = new URL(request.url);
     const code = requestUrl.searchParams.get('code');
 
-    const cookieStore = await cookies(); // async in Next 16
+    const cookieStore = (await cookies()) as any; // ✅ FIX
 
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
