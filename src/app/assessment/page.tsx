@@ -34,12 +34,13 @@ export default function AssessmentPage() {
     } else {
       setIsAnalyzing(true);
       
+      const scores = calculateScores(newAnswers);
+      const recommendation = generateRecommendation(scores, level || '10th');
+      let dbSuccess = false;
+
       try {
         const { data: { user } } = await supabase.auth.getUser();
         
-        const scores = calculateScores(newAnswers);
-        const recommendation = generateRecommendation(scores, level || '10th');
-
         if (user) {
            const { data: assessmentData, error: assessmentError } = await supabase
             .from('assessments')
@@ -67,21 +68,23 @@ export default function AssessmentPage() {
 
           if (resultError) throw resultError;
           
+          dbSuccess = true;
           setTimeout(() => {
             router.push(`/assessment/result/${assessmentData.id}`);
-          }, 3000);
-        } else {
-          // Fallback for guest mode: Pass ID or local storage
-          localStorage.setItem('guest_result', JSON.stringify(recommendation));
-          setTimeout(() => {
-            router.push(`/assessment/result/guest`);
           }, 3000);
         }
 
       } catch (error) {
         console.error("Error saving assessment:", error);
-        alert("Saved locally! DB error occurred. Check console for details.");
-        setIsAnalyzing(false);
+        // We do not alert here anymore. We will silently fallback to local storage so the user experience continues.
+      }
+
+      // Guest / Fallback Mode (If no user, or if DB insertion failed)
+      if (!dbSuccess) {
+        localStorage.setItem('guest_result', JSON.stringify(recommendation));
+        setTimeout(() => {
+          router.push(`/assessment/result/guest`);
+        }, 3000);
       }
     }
   };
