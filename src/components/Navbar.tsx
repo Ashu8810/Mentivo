@@ -38,10 +38,23 @@ export function Navbar() {
   }, []);
 
   const navLinks = [
-    { name: 'How It Works', href: '/#how-it-works' },
-    { name: 'What You Receive', href: '/#what-you-receive' },
-    { name: 'Sample Result', href: '/#sample' },
+    { name: 'How It Works', id: 'how-it-works', href: '/#how-it-works' },
+    { name: 'What You Receive', id: 'what-you-receive', href: '/#what-you-receive' },
+    { name: 'Sample Result', id: 'sample', href: '/#sample' },
   ];
+
+  const handleNavClick = (e: React.MouseEvent, href: string, id: string) => {
+    e.preventDefault();
+    if (window.location.pathname !== '/') {
+      window.location.href = href;
+    } else {
+      const element = document.getElementById(id);
+      if (element) {
+        const y = element.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }
+  };
 
   return (
     <header
@@ -61,13 +74,13 @@ export function Navbar() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
-            <Link
+            <button
               key={link.name}
-              href={link.href}
+              onClick={(e) => handleNavClick(e, link.href, link.id)}
               className="text-sm font-medium text-[#475569] hover:text-[#0F172A] transition-colors"
             >
               {link.name}
-            </Link>
+            </button>
           ))}
         </nav>
 
@@ -139,14 +152,16 @@ export function Navbar() {
             className="absolute top-20 left-0 right-0 bg-white border-b border-[var(--color-border-light)] shadow-lg p-6 md:hidden flex flex-col gap-4"
           >
             {navLinks.map((link) => (
-              <Link
+              <button
                 key={link.name}
-                href={link.href}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="text-lg font-medium text-[#0F172A] py-2 border-b border-[#F8FAFC]"
+                onClick={(e) => {
+                  setIsMobileMenuOpen(false);
+                  handleNavClick(e, link.href, link.id);
+                }}
+                className="text-lg font-medium text-[#0F172A] py-2 border-b border-[#F8FAFC] text-left"
               >
                 {link.name}
-              </Link>
+              </button>
             ))}
             <div className="flex flex-col gap-3 mt-4">
               <button

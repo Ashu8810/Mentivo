@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import { AuthProvider } from "@/context/AuthContext";
+import { AIAssistant } from "@/components/AIAssistant";
 
 export default function RootLayout({
   children,
@@ -31,6 +32,7 @@ export default function RootLayout({
       >
         <AuthProvider>
           {children}
+          <AIAssistant />
         </AuthProvider>
       </body>
     </html>

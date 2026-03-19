@@ -10,22 +10,22 @@ import { SamplePreview } from '@/components/SamplePreview';
 import { TrustSection } from '@/components/TrustSection';
 import { FinalCTA } from '@/components/FinalCTA';
 import { Footer } from '@/components/Footer';
-import { AIAssistant } from '@/components/AIAssistant';
 
 export default function Home() {
   return (
-    <main className="min-h-screen font-sans bg-[var(--color-bg-primary)] overflow-x-hidden selection:bg-blue-100 selection:text-blue-900">
+    <div className="font-sans selection:bg-blue-100 selection:text-blue-900">
       <Navbar />
-      <Hero />
-      <ProblemSection />
-      <HowItWorks />
-      <WhatYouReceive />
-      <TargetAudience />
-      <SamplePreview />
-      <TrustSection />
-      <FinalCTA />
-      <Footer />
-      <AIAssistant />
-    </main>
+      <main className="min-h-screen bg-[var(--color-bg-primary)] overflow-x-hidden">
+        <Hero />
+        <ProblemSection />
+        <HowItWorks />
+        <WhatYouReceive />
+        <TargetAudience />
+        <SamplePreview />
+        <TrustSection />
+        <FinalCTA />
+        <Footer />
+      </main>
+    </div>
   );
 }
