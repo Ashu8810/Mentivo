@@ -1,124 +1,150 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
-import { useAuth } from '@/context/AuthContext';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Loader2, ArrowLeft, Send, CheckCircle2 } from 'lucide-react';
-import { Navbar } from '@/components/Navbar';
-import { motion } from 'framer-motion';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import { assessmentQuestions } from '@/lib/assessmentData';
+import { calculateScores, generateRecommendation } from '@/lib/scoringEngine';
+import { supabase } from '@/lib/supabaseClient';
+import { QuestionCard } from '@/components/assessment/QuestionCard';
+import { ProgressBar } from '@/components/assessment/ProgressBar';
+import { AnalyzingState } from '@/components/assessment/AnalyzingState';
+import { ArrowRight } from 'lucide-react';
 
-export default function Assessment() {
-  const { user, loading } = useAuth();
+export default function AssessmentPage() {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isFinished, setIsFinished] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [answers, setAnswers] = useState<any[]>([]);
+  const [direction, setDirection] = useState(1);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [level, setLevel] = useState<'10th' | '12th' | 'college' | null>(null);
 
-  // Mock assessment state
-  const [scores] = useState({
-    analytical: 85,
-    creativity: 70,
-    business: 60,
-    structure: 75,
-    people: 80,
-    risk: 50
-  });
+  const currentQuestion = assessmentQuestions[currentIndex];
 
-  const handleSubmit = async () => {
-    if (!user) return;
-    setIsSubmitting(true);
+  const handleSelectLevel = (selectedLevel: '10th' | '12th' | 'college') => {
+    setLevel(selectedLevel);
+  };
 
-    const { error } = await supabase.from('assessments').insert([{
-      user_id: user.id,
-      ...scores,
-      primary_stream: 'Computer Science & HCI',
-      secondary_stream: 'Design Strategy',
-      confidence: '94'
-    }]);
+  const handleSelectOption = async (optionIndex: number, option: any) => {
+    const newAnswers = [...answers, { questionId: currentQuestion.id, selectedOption: option }];
+    setAnswers(newAnswers);
 
-    if (error) {
-      alert('Error saving assessment: ' + error.message);
-      setIsSubmitting(false);
+    if (currentIndex < assessmentQuestions.length - 1) {
+      setDirection(1);
+      setTimeout(() => setCurrentIndex(prev => prev + 1), 400);
     } else {
-      setIsFinished(true);
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 2000);
+      setIsAnalyzing(true);
+      
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        const scores = calculateScores(newAnswers);
+        const recommendation = generateRecommendation(scores, level || '10th');
+
+        if (user) {
+           const { data: assessmentData, error: assessmentError } = await supabase
+            .from('assessments')
+            .insert([{ 
+              user_id: user?.id, 
+              student_level: level || '10th',
+              status: 'completed'
+            }])
+            .select()
+            .single();
+
+          if (assessmentError) throw assessmentError;
+
+          const { error: resultError } = await supabase
+            .from('assessment_results')
+            .insert([{
+              assessment_id: assessmentData.id,
+              user_id: user?.id,
+              trait_scores: scores,
+              top_recommendation: recommendation.recommended,
+              secondary_recommendation: recommendation.secondary,
+              confidence_score: recommendation.confidence,
+              report_data: recommendation
+            }]);
+
+          if (resultError) throw resultError;
+          
+          setTimeout(() => {
+            router.push(`/assessment/result/${assessmentData.id}`);
+          }, 3000);
+        } else {
+          // Fallback for guest mode: Pass ID or local storage
+          localStorage.setItem('guest_result', JSON.stringify(recommendation));
+          setTimeout(() => {
+            router.push(`/assessment/result/guest`);
+          }, 3000);
+        }
+
+      } catch (error) {
+        console.error("Error saving assessment:", error);
+        alert("Saved locally! DB error occurred. Check console for details.");
+        setIsAnalyzing(false);
+      }
     }
   };
 
-  if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-white"><Loader2 className="w-8 h-8 animate-spin text-emerald-600" /></div>;
+  if (!level) {
+    return (
+      <div className="min-h-screen bg-[var(--color-bg-primary)] flex flex-col items-center justify-center p-6 text-[#0F172A] relative overflow-hidden">
+        {/* Mentivo Background Elements */}
+        <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] rounded-full bg-teal-50/50 blur-3xl opacity-60 pointer-events-none" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-50/50 blur-3xl opacity-60 pointer-events-none" />
+        
+        <div className="max-w-xl w-full text-center space-y-8 z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-50 border border-teal-100 text-emerald-950 text-sm font-medium mx-auto">
+            <span className="w-2 h-2 rounded-full bg-emerald-950 animate-pulse" />
+            System Calibration
+          </div>
+          
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#0F172A] leading-[1.15] tracking-tight">
+            Personalize Your <span className="text-[#059669]">Journey</span>
+          </h1>
+          <p className="text-lg md:text-xl text-[#475569] leading-relaxed">
+            Select your current academic stage so our AI can accurately calibrate the mapping algorithm to your specific educational milestone.
+          </p>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 pt-4">
+            {['10th', '12th', 'college'].map((lvl) => (
+              <button
+                key={lvl}
+                onClick={() => handleSelectLevel(lvl as any)}
+                className="group relative flex items-center justify-center gap-2 bg-white text-[#0F172A] px-8 py-6 rounded-2xl border border-[#E2E8F0] text-lg font-semibold hover:bg-teal-50/50 hover:border-teal-200 hover:shadow-lg transition-all hover:-translate-y-1 capitalize"
+              >
+                {lvl} Grade
+                <ArrowRight className="w-4 h-4 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all text-[#059669]" />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-[#F8FAFC]">
-        <Navbar />
-        
-        <main className="max-w-3xl mx-auto px-6 py-12 pt-32">
-          <button 
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-[#64748B] hover:text-[#0F172A] mb-8 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </button>
+    <div className="min-h-screen bg-[var(--color-bg-primary)] flex flex-col items-center py-12 px-6 relative overflow-hidden text-[#0F172A]">
+      <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] rounded-full bg-teal-50/50 blur-3xl opacity-60 pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-50/50 blur-3xl opacity-60 pointer-events-none" />
 
-          <div className="bg-white rounded-3xl p-8 md:p-12 border border-[#E2E8F0] shadow-sm">
-            {!isFinished ? (
-              <>
-                <h1 className="text-2xl font-bold text-[#0F172A] mb-6">Complete Your Assessment</h1>
-                <p className="text-[#64748B] mb-12">
-                  We&apos;ve simulated your responses for this demonstration. Review your profile before saving it to your dashboard.
-                </p>
-
-                <div className="space-y-8 mb-12">
-                  {Object.entries(scores).map(([key, value]) => (
-                    <div key={key} className="space-y-3">
-                      <div className="flex justify-between text-sm font-semibold capitalize">
-                        <span className="text-[#0F172A]">{key}</span>
-                        <span className="text-emerald-600">{value}%</span>
-                      </div>
-                      <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: `${value}%` }}
-                          className="h-full bg-emerald-500 rounded-full"
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                  className="w-full py-4 bg-[#059669] text-white rounded-2xl font-bold text-lg hover:bg-[#047857] transition-all flex items-center justify-center gap-3 disabled:opacity-70 shadow-lg shadow-emerald-950/10"
-                >
-                  {isSubmitting ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : (
-                    <>
-                      Save & Finish
-                      <Send className="w-5 h-5" />
-                    </>
-                  )}
-                </button>
-              </>
-            ) : (
-              <div className="py-12 text-center">
-                <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-600">
-                  <CheckCircle2 className="w-10 h-10" />
-                </div>
-                <h2 className="text-2xl font-bold text-[#0F172A] mb-4">Assessment Saved!</h2>
-                <p className="text-[#64748B]">Redirecting you to your dashboard...</p>
-              </div>
-            )}
+      {isAnalyzing ? (
+        <AnalyzingState />
+      ) : (
+        <div className="w-full max-w-4xl flex flex-col items-center justify-center min-h-[70vh] relative z-10">
+          <ProgressBar current={currentIndex + 1} total={assessmentQuestions.length} />
+          
+          <div className="w-full relative overflow-hidden h-auto min-h-[400px] flex items-center justify-center py-8">
+            <QuestionCard 
+              key={currentIndex}
+              question={currentQuestion}
+              selectedOptionIndex={null}
+              onSelectOption={handleSelectOption}
+              direction={direction}
+            />
           </div>
-        </main>
-      </div>
-    </ProtectedRoute>
+        </div>
+      )}
+    </div>
   );
 }
