@@ -37,22 +37,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
 
         if (session) {
-          const url = new URL(window.location.href);
-          let cleaned = false;
-          
-          if (url.hash.includes('access_token')) {
-            url.hash = '';
-            cleaned = true;
-          }
-          if (url.searchParams.has('code')) {
-            url.searchParams.delete('code');
-            cleaned = true;
-          }
-          
-          if (cleaned) {
-            window.history.replaceState(null, '', url.pathname + url.search + url.hash);
-          }
-
           // Redirect to dashboard ONLY if we are on login, signup, or root
           if (pathname === '/login' || pathname === '/signup' || pathname === '/') {
             router.push('/dashboard');
@@ -74,23 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
 
       if (event === 'SIGNED_IN') {
-        const url = new URL(window.location.href);
-        let cleaned = false;
-        
-        if (url.hash.includes('access_token')) {
-          url.hash = '';
-          cleaned = true;
-        }
-        if (url.searchParams.has('code')) {
-          url.searchParams.delete('code');
-          cleaned = true;
-        }
-        
-        if (cleaned) {
-          window.history.replaceState(null, '', url.pathname + url.search + url.hash);
-        }
-        
-        // Push safely using standard routing
+        // Redirect the user to the dashboard if they are on a guest page
         if (pathname === '/login' || pathname === '/signup' || pathname === '/') {
           router.push('/dashboard');
         }
