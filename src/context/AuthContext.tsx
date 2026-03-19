@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { User, Session } from '@supabase/supabase-js';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 type AuthContextType = {
   user: User | null;
@@ -24,6 +24,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     // Check active sessions and set the user
@@ -31,23 +32,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) throw error;
-
+        
         setSession(session);
         setUser(session?.user ?? null);
 
-        // 🔥 ADD THIS BLOCK
         if (session) {
-          console.log("✅ Session exists on load");
-
           // Clean URL if token exists
           if (window.location.hash.includes('access_token')) {
-            window.history.replaceState(null, '', window.location.pathname);
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
           }
 
-          // 🚀 Redirect immediately
-          router.push('/dashboard');
+          // Redirect to dashboard ONLY if we are on login, signup, or root
+          if (pathname === '/login' || pathname === '/signup' || pathname === '/') {
+            router.push('/dashboard');
+          }
         }
-
       } catch (error) {
         console.error('Error getting session:', error);
       } finally {
@@ -69,8 +68,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           // Clean up the URL by removing the access_token hash
           window.history.replaceState(null, '', window.location.pathname + window.location.search);
         }
-        // Redirect the user to the dashboard
-        router.push('/dashboard');
+        
+        // Push safely using standard routing
+        if (pathname === '/login' || pathname === '/signup' || pathname === '/') {
+          router.push('/dashboard');
+        }
       } else if (event === 'SIGNED_OUT') {
         router.push('/login');
       }
@@ -79,7 +81,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => {
       listener.subscription.unsubscribe();
     };
-  }, [router]);
+  }, [router, pathname]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
