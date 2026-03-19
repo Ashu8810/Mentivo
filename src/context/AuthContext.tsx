@@ -27,17 +27,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
 
   useEffect(() => {
-    // If Supabase falls back to the Site URL because /auth/callback wasn't added to Redirect URLs,
-    // we must manually forward the `code` to the server-side Next.js route handler to set cookies.
-    if (typeof window !== 'undefined') {
-      const searchParams = new URLSearchParams(window.location.search);
-      const code = searchParams.get('code');
-      if (code && pathname !== '/auth/callback') {
-        window.location.href = `/auth/callback?code=${code}`;
-        return;
-      }
-    }
-
     // Check active sessions and set the user
     const handleInitialSession = async () => {
       try {
@@ -48,9 +37,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(session?.user ?? null);
 
         if (session) {
-          // Clean URL if token exists
-          if (window.location.hash.includes('access_token')) {
-            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          const url = new URL(window.location.href);
+          let cleaned = false;
+          
+          if (url.hash.includes('access_token')) {
+            url.hash = '';
+            cleaned = true;
+          }
+          if (url.searchParams.has('code')) {
+            url.searchParams.delete('code');
+            cleaned = true;
+          }
+          
+          if (cleaned) {
+            window.history.replaceState(null, '', url.pathname + url.search + url.hash);
           }
 
           // Redirect to dashboard ONLY if we are on login, signup, or root
@@ -74,10 +74,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
 
       if (event === 'SIGNED_IN') {
-        const hash = window.location.hash;
-        if (hash && hash.includes('access_token')) {
-          // Clean up the URL by removing the access_token hash
-          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        const url = new URL(window.location.href);
+        let cleaned = false;
+        
+        if (url.hash.includes('access_token')) {
+          url.hash = '';
+          cleaned = true;
+        }
+        if (url.searchParams.has('code')) {
+          url.searchParams.delete('code');
+          cleaned = true;
+        }
+        
+        if (cleaned) {
+          window.history.replaceState(null, '', url.pathname + url.search + url.hash);
         }
         
         // Push safely using standard routing
