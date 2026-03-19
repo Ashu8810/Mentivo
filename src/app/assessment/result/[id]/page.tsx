@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 import { motion } from 'framer-motion';
 import { AssessmentResultData } from '@/lib/scoringEngine';
-import { CheckCircle2, ChevronRight, BrainCircuit, Target, Lightbulb, Rocket } from 'lucide-react';
+import { CheckCircle2, ChevronRight, BrainCircuit, Target, Lightbulb, Rocket, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ResultPage() {
@@ -13,6 +13,7 @@ export default function ResultPage() {
   const router = useRouter();
   const [result, setResult] = useState<AssessmentResultData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     async function fetchResult() {
@@ -43,9 +44,53 @@ export default function ResultPage() {
     }
     
     fetchResult();
-  }, [params?.id]);
+  }, [params?.id, router]);
 
-  if (loading) {
+  const handleSaveToDashboard = async () => {
+    setIsSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    try {
+      const local = localStorage.getItem('guest_result');
+      if (local) {
+        const payload = JSON.parse(local);
+        const { data: assessmentData, error: assessmentError } = await supabase
+          .from('assessments')
+          .insert([{ user_id: user.id, student_level: payload.level || '10th', status: 'completed' }])
+          .select().single();
+          
+        if (assessmentError) throw assessmentError;
+
+        const { error: resultError } = await supabase.from('assessment_results').insert([{
+           assessment_id: assessmentData.id,
+           user_id: user.id,
+           trait_scores: payload.scores,
+           top_recommendation: payload.recommendation.primary || payload.recommendation.recommended,
+           secondary_recommendation: payload.recommendation.secondary || payload.recommendation.secondary,
+           confidence_score: payload.recommendation.confidence,
+           report_data: payload.recommendation
+        }]);
+
+        if (resultError) throw resultError;
+        
+        localStorage.removeItem('guest_result');
+        router.push('/dashboard');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (error: any) {
+      console.error(error);
+      alert("Database Sync Failed: " + (error.message || "Please ensure your Supabase tables are set up."));
+      setIsSaving(false);
+    }
+  };
+
+  if (loading || !result) {
     return (
       <div className="min-h-screen bg-[var(--color-bg-primary)] flex flex-col items-center justify-center p-6 text-[#0F172A]">
         <div className="w-16 h-16 border-4 border-[#059669] border-t-transparent rounded-full animate-spin"></div>
@@ -200,12 +245,14 @@ export default function ResultPage() {
             <h3 className="text-[#0F172A] font-bold text-xl mb-1">Save this Assessment</h3>
             <p className="text-[#475569] text-base">Don't lose your data! Save this personalized report to your dashboard permanently.</p>
           </div>
-          <Link 
-            href="/dashboard"
-            className="mt-6 md:mt-0 px-8 py-4 bg-[#059669] text-white font-bold rounded-xl hover:bg-[#047857] hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-950/10 transition-all flex items-center justify-center whitespace-nowrap"
+          <button 
+            onClick={handleSaveToDashboard}
+            disabled={isSaving}
+            className="mt-6 md:mt-0 px-8 py-4 bg-[#059669] text-white font-bold rounded-xl hover:bg-[#047857] hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-950/10 transition-all flex items-center justify-center whitespace-nowrap disabled:opacity-75 disabled:cursor-not-allowed"
           >
-            Save to Dashboard
-          </Link>
+            {isSaving ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
+            {isSaving ? "Saving..." : "Save to Dashboard"}
+          </button>
         </motion.div>
       )}
 

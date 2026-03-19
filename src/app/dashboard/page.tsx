@@ -46,18 +46,23 @@ export default function Dashboard() {
               .select().single();
               
             if (!assessmentError && assessmentData) {
-              await supabase.from('assessment_results').insert([{
+              const { error: resultError } = await supabase.from('assessment_results').insert([{
                 assessment_id: assessmentData.id,
                 user_id: user.id,
                 trait_scores: payload.scores,
-                top_recommendation: payload.recommendation.recommendation.primary,
-                secondary_recommendation: payload.recommendation.recommendation.secondary,
+                top_recommendation: payload.recommendation.recommendation?.primary || payload.recommendation.recommended,
+                secondary_recommendation: payload.recommendation.recommendation?.secondary || payload.recommendation.secondary,
                 confidence_score: payload.recommendation.confidence,
                 report_data: payload.recommendation
               }]);
+              
+              if (!resultError) {
+                localStorage.removeItem('guest_result');
+              } else {
+                console.error("Failed to sync guest result:", resultError);
+              }
             }
           }
-          localStorage.removeItem('guest_result');
         }
       } catch (err) {
         console.error("Failed to sync guest result:", err);
