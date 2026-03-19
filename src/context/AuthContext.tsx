@@ -27,6 +27,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
 
   useEffect(() => {
+    // If Supabase falls back to the Site URL because /auth/callback wasn't added to Redirect URLs,
+    // we must manually forward the `code` to the server-side Next.js route handler to set cookies.
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search);
+      const code = searchParams.get('code');
+      if (code && pathname !== '/auth/callback') {
+        window.location.href = `/auth/callback?code=${code}`;
+        return;
+      }
+    }
+
     // Check active sessions and set the user
     const handleInitialSession = async () => {
       try {
