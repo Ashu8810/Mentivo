@@ -18,7 +18,10 @@ export default function ResultPage() {
     async function fetchResult() {
       if (params?.id === 'guest') {
         const local = localStorage.getItem('guest_result');
-        if (local) setResult(JSON.parse(local));
+        if (local) {
+          const parsed = JSON.parse(local);
+          setResult(parsed.recommendation ? parsed.recommendation : parsed);
+        }
         setLoading(false);
         return;
       }
@@ -104,10 +107,10 @@ export default function ResultPage() {
             <Target className="w-5 h-5 text-[#059669]" /> Primary Recommendation
           </h2>
           <h3 className="text-3xl lg:text-5xl font-bold text-[#0F172A] mb-6 tracking-tight">
-            {result.recommended}
+            {result.recommendation?.primary || 'Pathway Found'}
           </h3>
           <p className="text-[#475569] leading-relaxed text-lg mb-10 max-w-[600px]">
-            {result.why}
+            {result.analysis}
           </p>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-8 border-t border-gray-100 gap-6">
@@ -134,9 +137,9 @@ export default function ResultPage() {
           className="md:col-span-4 bg-white border border-[#E2E8F0] p-8 rounded-3xl flex flex-col shadow-sm"
         >
           <h2 className="text-[#475569] uppercase tracking-wider text-xs font-bold mb-3">Secondary Option</h2>
-          <h3 className="text-2xl font-bold text-[#0F172A] mb-4">{result.secondary}</h3>
+          <h3 className="text-2xl font-bold text-[#0F172A] mb-4">{result.recommendation?.secondary || 'Alternative Path'}</h3>
           <p className="text-[#475569] leading-relaxed text-sm">
-            Should your interests pivot, your trait profile also natively supports this pathway with a high probability of success.
+            {result.alternative_reason}
           </p>
           <div className="mt-auto pt-6">
             <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -176,7 +179,7 @@ export default function ResultPage() {
             <Rocket className="w-5 h-5 text-indigo-500" /> Future Trajectories
           </h2>
           <div className="flex flex-wrap gap-3">
-            {result.careers.map((career, i) => (
+            {result.career_paths?.map((career, i) => (
               <span key={i} className="px-5 py-2.5 bg-indigo-50 border border-indigo-100 rounded-xl text-indigo-900 font-semibold text-sm">
                 {career}
               </span>
@@ -185,6 +188,27 @@ export default function ResultPage() {
         </motion.div>
 
       </div>
+
+      {params?.id === 'guest' && (
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="w-full max-w-[1000px] mx-auto mt-8 flex flex-col md:flex-row items-center justify-between bg-teal-50 border border-teal-200 p-6 md:p-8 rounded-3xl shadow-sm z-10"
+        >
+          <div>
+            <h3 className="text-[#0F172A] font-bold text-xl mb-1">Save this Assessment</h3>
+            <p className="text-[#475569] text-base">Don't lose your data! Save this personalized report to your dashboard permanently.</p>
+          </div>
+          <Link 
+            href="/dashboard"
+            className="mt-6 md:mt-0 px-8 py-4 bg-[#059669] text-white font-bold rounded-xl hover:bg-[#047857] hover:-translate-y-1 hover:shadow-lg hover:shadow-emerald-950/10 transition-all flex items-center justify-center whitespace-nowrap"
+          >
+            Save to Dashboard
+          </Link>
+        </motion.div>
+      )}
+
     </div>
   );
 }

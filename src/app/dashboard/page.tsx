@@ -12,7 +12,8 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 type AssessmentResult = {
   id: string;
   assessment_id: string;
-  top_recommendation: string;
+  top_recommendation: string; // Stored in DB as string, mapped to DB
+  secondary_recommendation: string;
   confidence_score: number;
   created_at: string;
   trait_scores: {
@@ -33,6 +34,35 @@ export default function Dashboard() {
     async function fetchResults() {
       if (!user) return;
       
+      // Auto-Sync Guest Result if exists
+      try {
+        const local = localStorage.getItem('guest_result');
+        if (local) {
+          const payload = JSON.parse(local);
+          if (payload && payload.scores && payload.recommendation) {
+            const { data: assessmentData, error: assessmentError } = await supabase
+              .from('assessments')
+              .insert([{ user_id: user.id, student_level: payload.level || '10th', status: 'completed' }])
+              .select().single();
+              
+            if (!assessmentError && assessmentData) {
+              await supabase.from('assessment_results').insert([{
+                assessment_id: assessmentData.id,
+                user_id: user.id,
+                trait_scores: payload.scores,
+                top_recommendation: payload.recommendation.recommendation.primary,
+                secondary_recommendation: payload.recommendation.recommendation.secondary,
+                confidence_score: payload.recommendation.confidence,
+                report_data: payload.recommendation
+              }]);
+            }
+          }
+          localStorage.removeItem('guest_result');
+        }
+      } catch (err) {
+        console.error("Failed to sync guest result:", err);
+      }
+
       const { data, error } = await supabase
         .from('assessment_results')
         .select('*')

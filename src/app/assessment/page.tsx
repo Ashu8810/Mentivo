@@ -60,8 +60,8 @@ export default function AssessmentPage() {
               assessment_id: assessmentData.id,
               user_id: user?.id,
               trait_scores: scores,
-              top_recommendation: recommendation.recommended,
-              secondary_recommendation: recommendation.secondary,
+              top_recommendation: recommendation.recommendation.primary,
+              secondary_recommendation: recommendation.recommendation.secondary,
               confidence_score: recommendation.confidence,
               report_data: recommendation
             }]);
@@ -81,7 +81,7 @@ export default function AssessmentPage() {
 
       // Guest / Fallback Mode (If no user, or if DB insertion failed)
       if (!dbSuccess) {
-        localStorage.setItem('guest_result', JSON.stringify(recommendation));
+        localStorage.setItem('guest_result', JSON.stringify({ recommendation, scores, level: level || '10th' }));
         setTimeout(() => {
           router.push(`/assessment/result/guest`);
         }, 3000);
