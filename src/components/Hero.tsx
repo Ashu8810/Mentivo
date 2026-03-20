@@ -74,10 +74,10 @@ export function Hero() {
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
 
-              <button className="w-full sm:w-auto flex items-center justify-center gap-2 text-[#0F172A] px-8 py-4 rounded-xl text-base font-semibold border border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors">
+              <Link href="/demo" className="w-full sm:w-auto flex items-center justify-center gap-2 text-[#0F172A] px-8 py-4 rounded-xl text-base font-semibold border border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors">
                 <PlayCircle className="w-5 h-5 text-[#475569]" />
                 See How It Works
-              </button>
+              </Link>
             </motion.div>
 
             <motion.div

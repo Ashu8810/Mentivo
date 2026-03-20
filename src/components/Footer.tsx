@@ -73,9 +73,11 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
-           <p className="text-sm text-[#475569]">
-             © {currentYear} Mentivo. All rights reserved.
-           </p>
+           <div className="text-sm text-[#475569] flex flex-col md:flex-row items-center text-center gap-1 md:gap-2">
+             <span>© {currentYear} Mentivo. All rights reserved.</span>
+             <span className="hidden md:inline text-gray-300">|</span>
+             <span>Designed & Developed by <span className="font-semibold text-[#0F172A]">Jyoti Kumari & Sneha Yadav</span></span>
+           </div>
            <div className="flex gap-4">
              {/* Social placeholders */}
              <div className="w-8 h-8 rounded-full bg-gray-50 hover:bg-gray-100 flex items-center justify-center cursor-pointer transition-colors" />
