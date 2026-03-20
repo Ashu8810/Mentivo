@@ -29,11 +29,9 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           {/* Brand Column */}
           <div className="md:col-span-1">
-             <Link href="/" className="flex items-center gap-2 group mb-4">
-                <div className="w-8 h-8 rounded-lg bg-[#059669] flex items-center justify-center text-white font-bold text-lg group-hover:bg-[#047857] transition-colors">
-                  M
-                </div>
-                <span className="font-semibold text-xl tracking-tight text-[#0F172A]">Mentivo</span>
+             <Link href="/" className="flex items-center gap-3 group mb-4">
+               <img src="/logo.png" alt="Mentivo Logo" className="w-10 h-10 object-contain transition-transform group-hover:scale-105" />
+               <span className="font-semibold text-2xl tracking-tight text-[#0F172A]">Mentivo</span>
              </Link>
              <p className="text-sm text-[#475569] leading-relaxed max-w-[250px]">
                 AI-powered academic guidance helping students build futures with clarity and confidence.
