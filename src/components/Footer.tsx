@@ -5,6 +5,24 @@ import Link from 'next/link';
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
+  const handleNavClick = (e: React.MouseEvent, href: string) => {
+    if (href.startsWith('#')) {
+      e.preventDefault();
+      const id = href.replace('#', '');
+      if (window.location.pathname !== '/') {
+        window.location.href = `/${href}`;
+      } else {
+        const element = id === '' ? document.body : document.getElementById(id);
+        if (element) {
+          const y = element.getBoundingClientRect().top + window.scrollY - 80;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        } else if (id === '') {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }
+    }
+  };
+
   return (
     <footer className="bg-white border-t border-[#E2E8F0] pt-16 pb-8">
       <div className="max-w-[1280px] mx-auto px-6 lg:px-12">
@@ -27,29 +45,29 @@ export function Footer() {
             <div>
               <h4 className="font-semibold text-[#0F172A] mb-4">Product</h4>
               <ul className="space-y-3 text-sm text-[#475569]">
-                 <li><Link href="#how-it-works" className="hover:text-[#059669] transition-colors">How it Works</Link></li>
-                 <li><Link href="#what-you-receive" className="hover:text-[#059669] transition-colors">Features</Link></li>
-                 <li><Link href="#sample" className="hover:text-[#059669] transition-colors">Sample Report</Link></li>
-                 <li><Link href="#" className="hover:text-[#059669] transition-colors">Pricing</Link></li>
+                 <li><Link href="#how-it-works" onClick={(e) => handleNavClick(e, '#how-it-works')} className="hover:text-[#059669] transition-colors">How it Works</Link></li>
+                 <li><Link href="#what-you-receive" onClick={(e) => handleNavClick(e, '#what-you-receive')} className="hover:text-[#059669] transition-colors">Features</Link></li>
+                 <li><Link href="#sample" onClick={(e) => handleNavClick(e, '#sample')} className="hover:text-[#059669] transition-colors">Sample Report</Link></li>
+                 <li><Link href="#" onClick={(e) => handleNavClick(e, '#')} className="hover:text-[#059669] transition-colors">Pricing</Link></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-semibold text-[#0F172A] mb-4">Company</h4>
               <ul className="space-y-3 text-sm text-[#475569]">
-                 <li><Link href="#" className="hover:text-[#059669] transition-colors">About Us</Link></li>
-                 <li><Link href="#" className="hover:text-[#059669] transition-colors">Careers</Link></li>
-                 <li><Link href="#" className="hover:text-[#059669] transition-colors">Blog</Link></li>
-                 <li><Link href="#" className="hover:text-[#059669] transition-colors">Contact</Link></li>
+                 <li><Link href="/about" className="hover:text-[#059669] transition-colors">About Us</Link></li>
+                 <li><Link href="/careers" className="hover:text-[#059669] transition-colors">Careers</Link></li>
+                 <li><Link href="/blog" className="hover:text-[#059669] transition-colors">Blog</Link></li>
+                 <li><Link href="/contact" className="hover:text-[#059669] transition-colors">Contact</Link></li>
               </ul>
             </div>
 
             <div className="col-span-2 md:col-span-1">
               <h4 className="font-semibold text-[#0F172A] mb-4">Legal</h4>
-              <ul className="space-y-3 text-sm text-[#475569]">
-                 <li><Link href="#" className="hover:text-[#059669] transition-colors">Privacy Policy</Link></li>
-                 <li><Link href="#" className="hover:text-[#059669] transition-colors">Terms of Service</Link></li>
-                 <li><Link href="#" className="hover:text-[#059669] transition-colors">Cookie Policy</Link></li>
+               <ul className="space-y-3 text-sm text-[#475569]">
+                 <li><Link href="/privacy" className="hover:text-[#059669] transition-colors">Privacy Policy</Link></li>
+                 <li><Link href="/terms" className="hover:text-[#059669] transition-colors">Terms of Service</Link></li>
+                 <li><Link href="/cookies" className="hover:text-[#059669] transition-colors">Cookie Policy</Link></li>
               </ul>
             </div>
           </div>

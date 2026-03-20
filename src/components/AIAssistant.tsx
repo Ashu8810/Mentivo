@@ -202,7 +202,14 @@ export function AIAssistant() {
               initial={{ opacity: 0, y: 10, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.9 }}
-              className="bg-white px-4 py-2.5 rounded-2xl shadow-lg border border-[var(--color-border-light)] pointer-events-auto"
+              onClick={() => {
+                setIsOpen(true);
+                setShowTooltip(false);
+                if (typeof window !== 'undefined') {
+                  sessionStorage.setItem('mentivo-ai-tooltip-shown', 'true');
+                }
+              }}
+              className="bg-white px-4 py-2.5 rounded-2xl shadow-lg border border-[var(--color-border-light)] pointer-events-auto cursor-pointer hover:bg-slate-50 transition-colors"
             >
               <span className="text-sm font-medium text-[#0F172A]">Need help getting started?</span>
               <div className="absolute -bottom-2 right-8 w-4 h-4 bg-white border-b border-r border-[var(--color-border-light)] transform rotate-45" />
