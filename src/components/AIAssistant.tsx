@@ -381,7 +381,7 @@ export function AIAssistant() {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="flex flex-wrap gap-2 mb-4"
+                            className="flex flex-wrap gap-2 mb-0"
                          >
                             {quickActions.map((action, idx) => (
                                <button
@@ -395,23 +395,6 @@ export function AIAssistant() {
                          </motion.div>
                       )}
                    </AnimatePresence>
-
-                   <form onSubmit={handleSubmit} className="flex gap-2">
-                      <input 
-                         type="text" 
-                         value={inputValue}
-                         onChange={(e) => setInputValue(e.target.value)}
-                         placeholder="Ask me about streams, careers..."
-                         className="flex-1 bg-[#F8FAFC] border border-[#E2E8F0] rounded-full px-5 py-3 text-[14px] text-[#0F172A] focus:outline-none focus:ring-2 focus:ring-emerald-950/20 focus:border-emerald-950 transition-all placeholder:text-[#94A3B8]"
-                      />
-                      <button 
-                         type="submit"
-                         disabled={!inputValue.trim() || isTyping}
-                         className="w-12 h-12 rounded-full bg-[#059669] flex items-center justify-center text-white flex-shrink-0 hover:bg-[#047857] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                         <Send className="w-4 h-4" />
-                      </button>
-                   </form>
                 </div>
               </div>
             </motion.div>

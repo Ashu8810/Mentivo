@@ -245,7 +245,7 @@ export default function Login() {
             </button>
             <button 
               type="button" 
-              onClick={() => handleSocialLogin('apple')}
+              onClick={() => router.push('/auth-redirect')}
               disabled={isLoading}
               className="h-11 flex items-center justify-center gap-2 bg-white border border-[#E2E8F0] rounded-xl hover:bg-[#F8FAFC] hover:border-[#CBD5E1] transition-all text-[14px] font-medium text-[#0F172A] shadow-sm disabled:opacity-50"
             >
